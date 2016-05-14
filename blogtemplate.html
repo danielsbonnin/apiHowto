@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <meta name="description" content="HowTo use azure documentdb as a REST backend for multiple app platforms">
+    <meta name="description" content="Authenticating UWP app users for a REST backend secured with Oauth">
     <meta name="author" content="Daniel Bonnin">
     <!--<link rel="icon" href="../../favicon.ico">-->
 
@@ -46,8 +46,8 @@
     <div class="container">
 
       <div class="blog-header">
-        <h1 class="blog-title">Microsoft's Azure documentdb quickstart guide</h1>
-        <p class="lead blog-description">How to set up Azure documentdb as a REST backend.</p>
+        <h1 class="blog-title">Web Authentication Broker for API authentication</h1>
+        <p class="lead blog-description">A quickstart guide to connecting with a platform-agnostic API from a UWP app.</p>
       </div>
 
       <div class="row">
@@ -55,37 +55,44 @@
         <div class="col-sm-8 blog-main">
 
           <div class="blog-post">
+            <h2 class="blog-post-title">Is This For Me?</h2>
+            <p>This how-to guide is intended for developers who wish to connect with an api that requires Oauth authentication. </p>
+          </div><!-- /.blog-post -->
+          <div class="blog-post">
+            <h2 class="blog-post-title">High Level description</h2>
+            <p>An easy way to authenticate and authorise users on a REST-based backend, is to require users to login with Google, Facebook, Microsoft, or some other 
+            provider. Once an end user Signs in with the OAuth provider, your application gets a "token", which allows it to get the user's information from the provider.</p>
+            <p>From the <a href="https://en.wikipedia.org/wiki/OAuth">Wikipedia page</a> 
+            <blockquote>
+                <p>Generally, OAuth provides to clients a "secure delegated access" to server resources on behalf of a resource owner. It specifies a process for resource owners to authorize third-party access to their server resources without sharing their credentials</p>
+            </blockquote>
+            <h3>On a web application, the OAuth process is fairly simple:</h3>
+            <ol>
+                <li>The user clicks a button <button>login with &lt;provider name&gt;</button>
+                <li>The user is redirected to the provider's site to enter credentials
+                <li>The provider sends the web application a "token", authorizing your application access to the end user's information
+                <li>The site redirects the user back to the web application
+                <li>The application can now use authorized features of the provider on the user's behalf
+            </ol>
+            <h3>On a native Windows 10 application, the OAuth process is a little more nuanced:</h3>
+            <ol>
+                <li>The user clicks a button <button>login with &lt;provider name&gt;</button>
+                <li>The application does other stuff
+            </ol>
+          </div><!-- /.blog-post -->
+          <div class="blog-post">
             <h2 class="blog-post-title">Getting set up</h2>
             <p class="blog-post-meta">April 22, 2016 by <a href="#">Daniel Bonnin</a></p>
-<!--
-<p>This blog post shows a few different types of content that's supported and styled with Bootstrap. Basic typography, images, and code are all supported.</p>
-            <hr>
-            <p>Cum sociis natoque penatibus et magnis <a href="#">dis parturient montes</a>, nascetur ridiculus mus. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Sed posuere consectetur est at lobortis. Cras mattis consectetur purus sit amet fermentum.</p>
-            <blockquote>
-              <p>Curabitur blandit tempus porttitor. <strong>Nullam quis risus eget urna mollis</strong> ornare vel eu leo. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
-            </blockquote>
-            <p>Etiam porta <em>sem malesuada magna</em> mollis euismod. Cras mattis consectetur purus sit amet fermentum. Aenean lacinia bibendum nulla sed consectetur.</p>
-            <h2>Heading</h2>
-            <p>Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.</p>
-            <h3>Sub-heading</h3>
-            <p>Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
-            <pre><code>Example code block</code></pre>
-            <p>Aenean lacinia bibendum nulla sed consectetur. Etiam porta sem malesuada magna mollis euismod. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa.</p>
-            <h3>Sub-heading</h3>
-            <p>Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Aenean lacinia bibendum nulla sed consectetur. Etiam porta sem malesuada magna mollis euismod. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
-            <ul>
-              <li>Praesent commodo cursus magna, vel scelerisque nisl consectetur et.</li>
-              <li>Donec id elit non mi porta gravida at eget metus.</li>
-              <li>Nulla vitae elit libero, a pharetra augue.</li>
-            </ul>
-            <p>Donec ullamcorper nulla non metus auctor fringilla. Nulla vitae elit libero, a pharetra augue.</p>
-            <ol>
-              <li>Vestibulum id ligula porta felis euismod semper.</li>
-              <li>Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</li>
-              <li>Maecenas sed diam eget risus varius blandit sit amet non magna.</li>
-            </ol>
-            <p>Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis.</p>-->
           </div><!-- /.blog-post -->
+          <div class="blog-post">
+            <h2 class="blog-post-title">Getting set up</h2>
+            <p class="blog-post-meta">April 22, 2016 by <a href="#">Daniel Bonnin</a></p>
+          </div><!-- /.blog-post -->
+
+          
+          
+          
+<!--
 
           <div class="blog-post">
             <h2 class="blog-post-title">Another blog post</h2>
@@ -100,7 +107,7 @@
           </div><!-- /.blog-post -->
 
           <div class="blog-post">
-            <h2 class="blog-post-title">New feature</h2>
+            <h2 class="blog-post-title" id="otherConsiderations">Other Considerations</h2>
             <p class="blog-post-meta">December 14, 2013 by <a href="#">Chris</a></p>
 
             <p>Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Aenean lacinia bibendum nulla sed consectetur. Etiam porta sem malesuada magna mollis euismod. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
@@ -130,7 +137,7 @@
             <p>Author: Daniel Bonnin (bonnind)</p>
           </div>
           <div class="sidebar-module">
-            <h4>Archives</h4>
+<!--            <h4>Archives</h4>
             <ol class="list-unstyled">
               <li><a href="#">March 2014</a></li>
               <li><a href="#">February 2014</a></li>
@@ -154,12 +161,20 @@
               <li><a href="#">Facebook</a></li>
             </ol>
           </div>
+    -->
+            <h4>Jump to:</h4>
+            <ol class="list-unstyled">
+              <li><a href="#">Sign-in Button</a></li>
+              <li><a href="#">On the API server</a></li>
+              <li><a href="#">Asynchronous Request</a></li>
+              <li><a href="#">Credential Locker</a></li>
+              <li><a href="#otherConsiderations">Other Considerations</a></li>
+            </ol>
         </div><!-- /.blog-sidebar -->
 
       </div><!-- /.row -->
 
     </div><!-- /.container -->
-
     <footer class="blog-footer">
       <p>Blog template built for <a href="http://getbootstrap.com">Bootstrap</a> by <a href="https://twitter.com/mdo">@mdo</a>.</p>
       <p>
