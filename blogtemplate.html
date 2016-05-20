@@ -56,16 +56,17 @@
 
           <div class="blog-post">
             <h2 class="blog-post-title">Is This For Me?</h2>
-            <p>This how-to guide is intended for developers who wish to connect with an api that requires Oauth authentication. </p>
+            <p>This how-to guide is intended for Universal Windows Application developers who wish to connect with an api that requires authentication. </p>
           </div><!-- /.blog-post -->
           <div class="blog-post">
             <h2 class="blog-post-title">High Level description</h2>
             <p>An easy way to authenticate and authorise users on a REST-based backend, is to require users to login with Google, Facebook, Microsoft, or some other 
-            provider. Once an end user Signs in with the OAuth provider, your application gets a "token", which allows it to get the user's information from the provider.</p>
-            <p>From the <a href="https://en.wikipedia.org/wiki/OAuth">Wikipedia page</a> 
+            provider. Once an end user signs in with the Authorization server, your application gets a "token", which allows it to get the user's information from the provider.</p>
+            <p>From the <a href="https://en.wikipedia.org/wiki/OAuth">Wikipedia page</a> </p>
             <blockquote>
                 <p>Generally, OAuth provides to clients a "secure delegated access" to server resources on behalf of a resource owner. It specifies a process for resource owners to authorize third-party access to their server resources without sharing their credentials</p>
             </blockquote>
+            
             <h3>On a web application, the OAuth process is fairly simple:</h3>
             <ol>
                 <li>The user clicks a button <button>login with &lt;provider name&gt;</button>
@@ -75,10 +76,15 @@
                 <li>The application can now use authorized features of the provider on the user's behalf
             </ol>
             <h3>On a native Windows 10 application, the OAuth process is a little more nuanced:</h3>
+            <p><strong>The existing documentation is lacking: </strong>
+            (eg. "For Web applications, do this..., for ios and Android, use these purpose-built libraries..., for other devices, 
+            such as toasters, lawnmowers, Windows applications, etc, ask your users to use the card catalog at their local library to find a redirect_url")</p>
             <ol>
                 <li>The user clicks a button <button>login with &lt;provider name&gt;</button>
                 <li>The application does other stuff
             </ol>
+            <p>All OAuth2 implementations conform to the <a href="https://tools.ietf.org/html/rfc6749">IETF OAuth 2.0 Authorization Framework</a> standards specifications. Look to this document for canonical information.</p>
+            <p>For a great breakdown of the more common OAuth2 terms, refer to <a href="https://digitalleaves.com/blog/social-login-for-your-rest-api-using-oauth-2-i/#more-650">this blog post</a>.
           </div><!-- /.blog-post -->
           <div class="blog-post">
             <h2 class="blog-post-title">Getting set up</h2>
