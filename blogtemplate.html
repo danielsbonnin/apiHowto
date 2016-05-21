@@ -56,7 +56,7 @@
 
           <div class="blog-post">
             <h2 class="blog-post-title">Is This For Me?</h2>
-            <p>This how-to guide is intended for Universal Windows Application developers who wish to connect with an api that requires authentication. </p>
+            <p>This how-to guide is intended for Universal Windows Application developers who wish to connect with a secured endpoints api. </p>
           </div><!-- /.blog-post -->
           <div class="blog-post">
             <h2 class="blog-post-title">High Level description</h2>
@@ -87,10 +87,42 @@
             <p>For a great breakdown of the more common OAuth2 terms, refer to <a href="https://digitalleaves.com/blog/social-login-for-your-rest-api-using-oauth-2-i/#more-650">this blog post</a>.
           </div><!-- /.blog-post -->
           <div class="blog-post">
+            <h2 class="blog-post-title">WebAuthenticationBroker</h2>
+            <p>WebAuthenticationBroker is a purpose-built mechanism for simulating
+			the web application login experience within a Windows Store Application. 
+			It works like this:</p>
+			<ol>
+				<li>A browser window(with no chrome) opens on top of existing UI</li>
+				<li>The window displays a login form with a list of permissions to accept</li>
+				<li>When the user submits the form, the Authentication Server returns with a redirect url</li>
+				<li>The user might be redirected multiple times, according to the Authentication server's
+				method of authentication</li>
+				<li>The WebAuthenticationBroker sees the final redirect url (defined in a 
+				constructor argument)</li>
+				<li>The window closes</li>
+			</ol>
+			<p>If everything goes well and the Authentication Server has authenticated the user, 
+			the WebAuthenticationBroker returns with a token of some kind (depending on the 
+			authentication type)</p>
+			<p>With a Universal Windows Application, the WebAuthenticationBroker is capable of 
+			retrieving the response string in the "title" field of the Authentication Server's 
+			response. In other cases (such as smart tvs), the response may have to be displayed
+			in such a way that the user can copy it, and then submit it to the Authentication
+			Server via a web browser.</p>
+			<p>In our application, we are using the Authorization Code Grant Flow, and will
+			be getting the code via the title field. See the sample javascript code below:</p>
+<p data-height="265" data-theme-id="0" data-slug-hash="bpPypa" data-default-tab="result" data-user="danielsbonnin" data-embed-version="2" class="codepen">See the Pen <a href="http://codepen.io/danielsbonnin/pen/bpPypa/">bpPypa</a> by Daniel S Bonnin (<a href="http://codepen.io/danielsbonnin">@danielsbonnin</a>) on <a href="http://codepen.io">CodePen</a>.</p>
+<script async src="//assets.codepen.io/assets/embed/ei.js"></script>
+          </div><!-- /.blog-post -->
+          <div class="blog-post">
+            <h2 class="blog-post-title"></h2>
+            <p class="blog-post-meta">April 22, 2016 by <a href="#">Daniel Bonnin</a></p>
+          </div><!-- /.blog-post -->
+		            <div class="blog-post">
             <h2 class="blog-post-title">Getting set up</h2>
             <p class="blog-post-meta">April 22, 2016 by <a href="#">Daniel Bonnin</a></p>
           </div><!-- /.blog-post -->
-          <div class="blog-post">
+		            <div class="blog-post">
             <h2 class="blog-post-title">Getting set up</h2>
             <p class="blog-post-meta">April 22, 2016 by <a href="#">Daniel Bonnin</a></p>
           </div><!-- /.blog-post -->
