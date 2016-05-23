@@ -46,8 +46,9 @@
     <div class="container">
 
       <div class="blog-header">
-        <h1 class="blog-title">Web Authentication Broker for API authentication</h1>
-        <p class="lead blog-description">A quickstart guide to connecting with a platform-agnostic API from a UWP app.</p>
+        <h1 class="blog-title">Consuming a Google Cloud Endpoints api from a 
+          Windows 10 app</h1>
+        <p class="lead blog-description">A tutorial for wrestling with WinRT, WinJS, Google Cloud Endpoints, and Oauth tokens.</p>
       </div>
 
       <div class="row">
@@ -55,113 +56,332 @@
         <div class="col-sm-8 blog-main">
 
           <div class="blog-post">
-            <h2 class="blog-post-title">Is This For Me?</h2>
-            <p>This how-to guide is intended for Universal Windows Application developers who wish to connect with a secured endpoints api. </p>
+            <h2 id="why" class="blog-post-title">Why would I do that?</h2>
+            <p><strong>Windows 10</strong> has a compelling new runtime that allows developers
+              to create "universal" applications that run on all Windows 10 
+              devices (including Xbox, pc, phone, surface, etc) with a modern, 
+              clean UI that is uniform across all platforms.</p>
+            <p><strong>Google Cloud Endpoints</strong> is a scalable, extensible, and powerful
+              service for creating mobile backends. It has a friendly developer
+              console, and built in support for all of the Google AppEngine
+              apis.</p>
+            <p>Unfortunately, all the amazing tooling and support for one 
+              seems to ignore the existence of the other (that I can find, anyway). 
+              This is bad news for a developer who wants a truly cross-platform
+              backend, for <strong>native</strong> mobile applications, and wants
+              to be in the <strong>Windows Store</strong>.</p>
+              <h3>Your alternatives (partial list):</h3>
+              <ul>
+                <li><h4>Ignore Windows (a popular choice)</h4>
+                  <p>Create a data model in your backend language of choice, 
+                    install objective c and java sdks for ios and Android, run 
+                    some included command line tools, and use friendly client
+                    libraries to transparently sync data with Endpoints</p>
+                </li>
+                <li><h4>Use Microsoft Azure Mobile Services</h4>
+                <p>Microsoft offers mobile backend services as well.</p>
+                <li><h4>Web view option</h4>
+                  <p>Use a javascript library such as AngularJS, and incorporate
+                    the Cloud Endpoints JavaScript client library</p>
+              </ul>
+              <p><strong>However</strong>, with a few pointers and a little work, it can be worthwhile to "roll your own" credentials schema.  You can marry 
+                these two technologies without compromising the UI or 
+                performance of your Universal Windows Program.</p>
           </div><!-- /.blog-post -->
           <div class="blog-post">
-            <h2 class="blog-post-title">High Level description</h2>
-            <p>An easy way to authenticate and authorise users on a REST-based backend, is to require users to login with Google, Facebook, Microsoft, or some other 
-            provider. Once an end user signs in with the Authorization server, your application gets a "token", which allows it to get the user's information from the provider.</p>
-            <p>From the <a href="https://en.wikipedia.org/wiki/OAuth">Wikipedia page</a> </p>
+            <h2 id="oauth" class="blog-post-title">OAuth 2.0</h2>
+            <p>From the OAuth <a href="https://en.wikipedia.org/wiki/OAuth">Wikipedia page</a>: </p>
             <blockquote>
                 <p>Generally, OAuth provides to clients a "secure delegated access" to server resources on behalf of a resource owner. It specifies a process for resource owners to authorize third-party access to their server resources without sharing their credentials</p>
             </blockquote>
-            
-            <h3>On a web application, the OAuth process is fairly simple:</h3>
-            <ol>
-                <li>The user clicks a button <button>login with &lt;provider name&gt;</button>
-                <li>The user is redirected to the provider's site to enter credentials
-                <li>The provider sends the web application a "token", authorizing your application access to the end user's information
-                <li>The site redirects the user back to the web application
-                <li>The application can now use authorized features of the provider on the user's behalf
-            </ol>
-            <h3>On a native Windows 10 application, the OAuth process is a little more nuanced:</h3>
-            <p><strong>The existing documentation is lacking: </strong>
-            (eg. "For Web applications, do this..., for ios and Android, use these purpose-built libraries..., for other devices, 
-            such as toasters, lawnmowers, Windows applications, etc, ask your users to use the card catalog at their local library to find a redirect_url")</p>
-            <ol>
-                <li>The user clicks a button <button>login with &lt;provider name&gt;</button>
-                <li>The application does other stuff
-            </ol>
-            <p>All OAuth2 implementations conform to the <a href="https://tools.ietf.org/html/rfc6749">IETF OAuth 2.0 Authorization Framework</a> standards specifications. Look to this document for canonical information.</p>
-            <p>For a great breakdown of the more common OAuth2 terms, refer to <a href="https://digitalleaves.com/blog/social-login-for-your-rest-api-using-oauth-2-i/#more-650">this blog post</a>.
-          </div><!-- /.blog-post -->
-          <div class="blog-post">
-            <h2 class="blog-post-title">WebAuthenticationBroker</h2>
-            <p>WebAuthenticationBroker is a purpose-built mechanism for simulating
-			the web application login experience within a Windows Store Application. 
-			It works like this:</p>
-			<ol>
-				<li>A browser window(with no chrome) opens on top of existing UI</li>
-				<li>The window displays a login form with a list of permissions to accept</li>
-				<li>When the user submits the form, the Authentication Server returns with a redirect url</li>
-				<li>The user might be redirected multiple times, according to the Authentication server's
-				method of authentication</li>
-				<li>The WebAuthenticationBroker sees the final redirect url (defined in a 
-				constructor argument)</li>
-				<li>The window closes</li>
-			</ol>
-			<p>If everything goes well and the Authentication Server has authenticated the user, 
-			the WebAuthenticationBroker returns with a token of some kind (depending on the 
-			authentication type)</p>
-			<p>With a Universal Windows Application, the WebAuthenticationBroker is capable of 
-			retrieving the response string in the "title" field of the Authentication Server's 
-			response. In other cases (such as smart tvs), the response may have to be displayed
-			in such a way that the user can copy it, and then submit it to the Authentication
-			Server via a web browser.</p>
-			<p>In our application, we are using the Authorization Code Grant Flow, and will
-			be getting the code via the title field. See the sample javascript code below:</p>
-<p data-height="442" data-theme-id="dark" data-slug-hash="bpPypa" data-default-tab="result" data-user="danielsbonnin" data-embed-version="2" class="codepen">See the Pen <a href="http://codepen.io/danielsbonnin/pen/bpPypa/">bpPypa</a> by Daniel S Bonnin (<a href="http://codepen.io/danielsbonnin">@danielsbonnin</a>) on <a href="http://codepen.io">CodePen</a>.</p>
-<script async src="//assets.codepen.io/assets/embed/ei.js"></script>          </div><!-- /.blog-post -->
-          <div class="blog-post">
-            <h2 class="blog-post-title"></h2>
-            <p class="blog-post-meta">April 22, 2016 by <a href="#">Daniel Bonnin</a></p>
-          </div><!-- /.blog-post -->
-		            <div class="blog-post">
-            <h2 class="blog-post-title">Getting set up</h2>
-            <p class="blog-post-meta">April 22, 2016 by <a href="#">Daniel Bonnin</a></p>
-          </div><!-- /.blog-post -->
-		            <div class="blog-post">
-            <h2 class="blog-post-title">Getting set up</h2>
-            <p class="blog-post-meta">April 22, 2016 by <a href="#">Daniel Bonnin</a></p>
-          </div><!-- /.blog-post -->
-
-          
-          
-          
-<!--
-          <div class="blog-post">
-            <h2 class="blog-post-title">Another blog post</h2>
-            <p class="blog-post-meta">December 23, 2013 by <a href="#">Jacob</a></p>
-            <p>Cum sociis natoque penatibus et magnis <a href="#">dis parturient montes</a>, nascetur ridiculus mus. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Sed posuere consectetur est at lobortis. Cras mattis consectetur purus sit amet fermentum.</p>
+            <p>from the <a href="https://en.wikipedia.org/wiki/OAuth#OAuth_2.0">OAuth 2.0 section</a>: </p>
             <blockquote>
-              <p>Curabitur blandit tempus porttitor. <strong>Nullam quis risus eget urna mollis</strong> ornare vel eu leo. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
+              <p>OAuth 2.0 is the next evolution of the OAuth protocol and is not backwards compatible with OAuth 1.0. OAuth 2.0 focuses on client developer simplicity while providing specific authorization flows for web applications, desktop applications, mobile phones, and living room devices. </p>
             </blockquote>
-            <p>Etiam porta <em>sem malesuada magna</em> mollis euismod. Cras mattis consectetur purus sit amet fermentum. Aenean lacinia bibendum nulla sed consectetur.</p>
-            <p>Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.</p>
-          </div><!-- /.blog-post -->
+            
+            <p>Cloud endpoints needs OAuth 2.0 credentials to identify a user. 
+              These credentials are in the form of a <a href="https://tools.ietf.org/html/rfc7519">JWT</a>
+              . OAuth 2.0 specifies an <a href="https://tools.ietf.org/html/rfc6749#section-1.2">
+              abstract "flow"</a>, defining a pattern for authorizing a user.</p>
+              <p id="flows">There are specific flows for different common use cases:</p>
+              <ul>
+                <li>browser client 
+                  (<a href="https://tools.ietf.org/html/rfc6749#section-1.3.2">implicit</a>),
+                <li>mobile apps 
+                  (<a href="https://tools.ietf.org/html/rfc6749#section-1.3.1">authorization code</a>),
+                <li>application access 
+                  (<a href="https://tools.ietf.org/html/rfc6749#section-1.3.4">client</a>),
+                <li>plain username and password
+                  (<a href="https://tools.ietf.org/html/rfc6749#section-1.3.3">resource owner</a>).</p>
+              </ul><br />
 
+              <p><i>For a great breakdown of the more common OAuth2 terms, refer to <a href="https://digitalleaves.com/blog/social-login-for-your-rest-api-using-oauth-2-i/#more-650">this blog post</a>.</i></p>
+              <p><i>The definitive reference for all things OAuth 2.0:
+              <a href="https://tools.ietf.org/html/rfc6749">RFC 6749</a></i></p>
+              <a href="#why">Back to Top</a>
+          </div><!-- /.oauth2-->
           <div class="blog-post">
-            <h2 class="blog-post-title" id="otherConsiderations">Other Considerations</h2>
-            <p class="blog-post-meta">December 14, 2013 by <a href="#">Chris</a></p>
-
-            <p>Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Aenean lacinia bibendum nulla sed consectetur. Etiam porta sem malesuada magna mollis euismod. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
-            <ul>
-              <li>Praesent commodo cursus magna, vel scelerisque nisl consectetur et.</li>
-              <li>Donec id elit non mi porta gravida at eget metus.</li>
-              <li>Nulla vitae elit libero, a pharetra augue.</li>
-            </ul>
-            <p>Etiam porta <em>sem malesuada magna</em> mollis euismod. Cras mattis consectetur purus sit amet fermentum. Aenean lacinia bibendum nulla sed consectetur.</p>
-            <p>Donec ullamcorper nulla non metus auctor fringilla. Nulla vitae elit libero, a pharetra augue.</p>
+            <h2 id="gaeSetup" class="blog-post-title">App Engine Setup</h2><br />
+            <h3>Obtain credentials from Google</h3>
+            <ol>
+              <li><p>With Google Appengine (Cloud Endoints runs on top of Appengine),
+                your OAuth 2.0 credentials depend on your use case (see above).
+                Start in the <a href="https://console.cloud.google.com">Developers Console</a>
+                , and if you haven't yet, create a project.</p>
+              <li><p>API Manager->credentials->Create credentials->OAuth client ID
+                    -><strong>Other</strong><br/>
+                    <i>Notice how PlayStation 4 has a category, but Windows doesn't!</i></p>
+                  
+              <li><p>Follow the prompts. <i>Make sure to fill out the "OAuth consent screen"</i></p>
+              <li><p>From API Manager->Overview, select and enable the Google+ API.</p>
+            </ol>
+            <p>You will need to use the credentials from your OAuth 2.0 client IDs</p>
+            <p> 
+              <a href="https://cloud.google.com/appengine/docs/python/endpoints/getstarted/backend/write_api">
+              Write your backend api</a> if you haven't already.</p>
+              <a href="#why">Back to Top</a>
           </div><!-- /.blog-post -->
+          <div class="blog-post">
+            <h2 id="winSetup" class="blog-post-title">Windows App Set Up</h2>
+            <p><a href="https://msdn.microsoft.com/en-us/windows/uwp/get-started/get-set-up">
+              Set up your environment</a></p>
+            <p><a href="https://msdn.microsoft.com/en-us/windows/uwp/get-started/create-a-hello-world-app-js-universal">
+              Create a WinJS app</a><i> Optionally, you can choose another language 
+              besides javascript</i>
+            </p>
+            <p>If you're still here, we'll discuss some of the sticking points
+              with user authentication in WinJS.</p> 
+            
+            <p><strong>Note: </strong><i>The code examples in this tutorial are written in javascript, 
+              using the WinJS library. The same concepts apply if you want to 
+              program your app in C#</i></p>
+              <a href="#why">Back to Top</a>
+          </div><!-- /.blog-post -->
+          <div class="blog-post">
+            <h2 id="codeFlow" class="blog-post-title">Authorization Code Flow</h2>
+            <p>You may recall our <a href="#flows">discussion of flows</a> from earlier. 
+              Selecting "Other" for our "application type" in 
+              the <a href="https://console.cloud.google.com">Developers Console</a>, 
+              means that we will be <a href="https://developers.google.com/identity/protocols/OAuth2InstalledApp#overview">"Using OAuth2 for
+              Installed Applications"</a>. This implements that 
+              <strong><a href="https://tools.ietf.org/html/rfc6749#section-1.3.1">
+                Authorization Code Flow</a></strong> we talked about.
+            </p>
+            <h3>Here's the Authorization Code flow in a nutshell:</h3> 
+            <ol>
+              <li>User-Agent (browser) sends request to Authorization Server (Google)
+              <li>Google authenticates the Resource Owner (User)
+              <li>Google sends a Authorization Code to the browser
+              <li>Browser sends code to Client (App)
+              <li>App redeems code with Google for Bearer Token 
+                (contains access_token, id_token, refresh_token)
+              <li>App can now use access_token for delegated authorization, to allow
+                the Endpoints API to get the User's profile information.
+            </ol>
+            <img src="./flow.png"/>
+            <p><i>This is also known as a "3-legged" auth flow</i></p>
+            <p>This is a fairly transparent process in a web browser. "Redirect URIs"
+               direct the browser through the flow and back to the starting point as 
+               the user initiates and authenticates. We could certainly do something
+               like that with a <a href="https://msdn.microsoft.com/en-us/library/windows/apps/dn301831.aspx">web view</a>, or by 
+               opening the system web browser. However, Windows Runtime (WinRT) 
+               provides a tool to handle this, called 
+               <strong>WebAuthenticationBroker</strong>
+             </p>
+            <a href="#why">Back to Top</a>
+          </div><!-- /.blog-post -->
+          <div id="wab" class="blog-post">
+            <h2 class="blog-post-title">WebAuthenticationBroker</h2>
+            <p><a href="https://msdn.microsoft.com/en-us/library/windows/apps/windows.security.authentication.web.webauthenticationbroker.aspx">WebAuthenticationBroker</a> is a 
+              purpose-built mechanism for simulating the web application login 
+              experience within a Windows Store Application. It works like this:
+            </p>
+			      <ol>
+				      <li>A browser window(with no chrome) opens on top of existing UI</li>
+				      <li>The window displays a login form with a list of permissions to accept</li>
+				      <li>When the user submits the form, the Authentication Server returns with a redirect url</li>
+				      <li>The user might be redirected multiple times, according to the Authentication server's
+				        method of authentication</li>
+				      <li>The WebAuthenticationBroker sees the final redirect url (defined in a 
+				        constructor argument)</li>
+				      <li>The window closes</li>
+            </ol>
+            <p>If everything goes well and the Authentication Server has authenticated the user, 
+              the WebAuthenticationBroker returns our Authorization Code</p>
+            <p>With a Universal Windows Application, the WebAuthenticationBroker is capable of 
+              retrieving the response string in the "title" field of the Authentication Server's 
+              response. In other cases (such as smart tvs), the response may have to be displayed
+              in such a way that the user can copy it, and then submit it to the Authentication
+              Server via a web browser.
+            </p>
+            <p>In our application, we are using the Authorization Code Grant Flow, and will
+              be getting the code via the title field. See the sample javascript code below:</p>
+            <p data-height="512" data-theme-id="0" data-slug-hash="bpPypa" data-default-tab="js" data-user="danielsbonnin" data-embed-version="2" class="codepen">See the Pen <a href="http://codepen.io/danielsbonnin/pen/bpPypa/">bpPypa</a> by Daniel S Bonnin (<a href="http://codepen.io/danielsbonnin">@danielsbonnin</a>) on <a href="http://codepen.io">CodePen</a>.</p>
+<script async src="//assets.codepen.io/assets/embed/ei.js"></script>    
+            <h3>Notes:</h3>
+            <ul>
+              <li>The 
+                <a href="https://msdn.microsoft.com/en-us/library/windows/apps/br212067.aspx">
+                authenticateAsync()</a> function returns a promise object. 
+                <a href="https://msdn.microsoft.com/windows/uwp/threading-async/asynchronous-programming-universal-windows-platform-apps">Asynchronous programming</a> plays a big 
+                role in developing Universal Windows Programs in WinJS.
+              <li> The "scopes" options are defined in the <a href="https://developers.google.com/+/web/api/rest/oauth#authorization-scopes">Google 
+                Documentation</a> on Login scopes.
+            </ul>    
+            <p>Next, we will discuss how to handle our Authorization Code.</p>
+            <a href="#why">Back to Top</a>
+          </div><!-- /.blog-post -->
+          <div class="blog-post">
+            <h2 id="swap" class="blog-post-title">Swapping the code for the JWT ("jot")</h2>
+            <p>As soon as we get the Authorization code, we need to hand it off
+              for a Bearer token.  No matter which Oauth 2.0 provider you use, 
+              you'll need to look in their documentation for a "token endpoint"
+              URL. This is the destination for the Authorization Code. We also have
+              to send off the client ID, and client secret. You can think of them
+              as the username and password for your api. You obtain these from 
+              the <a href="https://console.cloud.google.com">Developers Console</a> 
+              like we talked about before.</p>
+            <p data-height="515" data-theme-id="0" data-slug-hash="JXgbgR" data-default-tab="js" data-user="danielsbonnin" data-embed-version="2" class="codepen">See the Pen <a href="http://codepen.io/danielsbonnin/pen/JXgbgR/">JXgbgR</a> by Daniel S Bonnin (<a href="http://codepen.io/danielsbonnin">@danielsbonnin</a>) on <a href="http://codepen.io">CodePen</a>.</p>
+<script async src="//assets.codepen.io/assets/embed/ei.js"></script>
+            <h3>Note:</h3>
+            <ul>
+              <li>We used a different function for communicating with the server
+                this time. The 
+                <a href="https://msdn.microsoft.com/en-us/library/windows/apps/br229787.aspx">
+                WinJS.xhr()</a> function is one of two common ways to make http
+                requests from a Universal Windows Application (the other being 
+                <a href="https://msdn.microsoft.com/en-us/library/windows/apps/windows.web.http.httpclient.aspx">
+                  the Windows.Web.Http.HttpClient class)</a>. Generally speaking, 
+                  HttpClient is more powerful, but for simple requests, I prefer 
+                  WinJS.xhr() for its readability.
+            </ul>    
+            <a href="#why">Back to Top</a>
+          </div><!-- /.blog-post -->
+          <div class="blog-post">
+            <h2 id="tokens" class="blog-post-title">Store, retrieve, refresh, and revoke tokens</h2>
+            <h3>About the Bearer token</h3>
+            <p>From <a href="https://tools.ietf.org/html/rfc6750">RFC 6750</a>: </p>
+            <blockquote>Any party in possession of a bearer token (a "bearer") 
+              can use it to get access to the associated resources (without 
+              demonstrating possession of a cryptographic key).  To prevent 
+              misuse, bearer tokens need to be protected from disclosure in 
+              storage and in transport.
+            </blockquote>
+            <p>In other words, we must securely store our token, and we can only
+              send it via ssl (or some other secure transport layer protocol).
+            </p>
+            <p>The Bearer token we receive from Google, itself contains 3 tokens:</p>
+            <ol>
+              <li><strong>id_token</strong>: From <a href="https://developers.google.com/identity/protocols/OpenIDConnect#server-flow">Google's OpenIDConnect
+                documentation</a>:  
+                <blockquote>"A JWT that contains identity information about 
+                  the user that is digitally signed by Google."
+                </blockquote>
+              <li><strong>access_token</strong>: 
+              <blockquote>
+                "A token that can be sent to a Google API"
+              </blockquote>
+              <li><strong>refresh_token</strong>: From 
+                <a href="https://tools.ietf.org/html/rfc6749#section-1.5">
+                  RFC 6749
+                </a>:
+                <blockquote>
+                  Refresh tokens are credentials used to obtain access tokens.  
+                  Refresh tokens are issued to the client by the authorization 
+                  server and are used to obtain a new access token when the 
+                  current access token becomes invalid or expires.
+                </blockquote> 
+            </ol>
+            <p>Access tokens are short-lived (as a security feature). In the case 
+              of our Google tokens, they are currently set to last 1 hour. As such, 
+              they need to be refreshed once they expire. So, not only will
+              we need to save the current access token, we will also need to 
+              store the refresh token. WinRT provides a tool for that with
+              <strong><a href="https://msdn.microsoft.com/library/windows/apps/br227081">
+                PasswordVault</a></strong>
+            </p>
+            <h3>Password Vault Example:</h3>
+            <p data-height="573" data-theme-id="0" data-slug-hash="xVvggq" data-default-tab="js" data-user="
+              danielsbonnin" data-embed-version="2" class="codepen">See the Pen <a href="http://codepen.io/danielsbonnin/pen/xVvggq/">xVvggq</a> by Daniel S Bonnin (<a href="http://codepen.io/danielsbonnin">@danielsbonnin</a>) on <a href="http://codepen.io">CodePen</a>.</p>
+            <script async src="//assets.codepen.io/assets/embed/ei.js"></script>
+            <h4>Notes:</h4>
+            <ul>
+              <li>The arguments to the
+                <a href="https://msdn.microsoft.com/en-us/library/windows/apps/windows.security.credentials.passwordcredential">PasswordCredential</a>constructor are "resource", 
+                "userName", and "password". In our usage, we are treating the token
+                as the "password".
+              <li>Trying to retrieve a non-existent credential results in an 
+                exception, which we need to catch.
+              <li>You'll want to add a "resource" parameter to these getter
+                and setter functions in order to specify "facebook_login" etc.
+              <li>The tokenRevoke() function occurs when the user opts to "log out" 
+                of a particular OAuth provider. All the tokens of the specified
+                "resource" are simply deleted.
+            </ul>    
+            <h3>Access token expiration</h3>
+            <p>Like I mentioned, access tokens are short-lived, and must be 
+              refreshed. We can determine whether an access token is expired by 
+              sending it to the "tokeninfo" endpoint, and reading the "expired-in" 
+              field of the response</p>
+            <p data-height="555" data-theme-id="0" data-slug-hash="yOmgKe" data-default-tab="js" data-user="
+              danielsbonnin" data-embed-version="2" class="codepen">See the Pen <a href="http://codepen.io/danielsbonnin/pen/yOmgKe/">yOmgKe</a> by Daniel S Bonnin (<a href="http://codepen.io/danielsbonnin">@danielsbonnin</a>) on <a href="http://codepen.io">CodePen</a>.</p>
+            <script async src="//assets.codepen.io/assets/embed/ei.js"></script>
+            
+            <h4>Note:</h4>
+            <ul>
+              <li>The parameters for getTokenExpiration() are callback functions
+                which are called depending on the outcome of the tokeninfo request.
+            </ul> 
+            <h3>Refreshing the Access Token</h3>
+            <p data-height="559" data-theme-id="0" data-slug-hash="xVvgXr" data-default-tab="js" data-user="danielsbonnin" data-embed-version="2" class="codepen">See the Pen <a href="http://codepen.io/danielsbonnin/pen/xVvgXr/">xVvgXr</a> by Daniel S Bonnin (<a href="http://codepen.io/danielsbonnin">@danielsbonnin</a>) on <a href="http://codepen.io">CodePen</a>.</p>
+          <script async src="//assets.codepen.io/assets/embed/ei.js"></script>
+          <p>A lot of stuff is going on here, let's step through it:
+          <ul>
+            <li>Get the refresh token using the getter function above. If, for some
+              reason, it does not exist, do the <a href="#wab">Authorization Code 
+              Flow</a> to obtain new tokens.
+            <li>Assuming there is a refresh token available, send it (over TLS) to
+              the documented "token endpoint" in the <strong>body</strong> of a post
+              request. Make sure specify the "application/x-www-form-urlencoded"
+              content-type in the header per <a href="https://tools.ietf.org/html/rfc6749#section-6">
+              RFC 6749 Section 6</a>
+            <li>If the token refresh fails, do the <a href="#wab">Authorization Code 
+              Flow</a> to obtain new tokens.
+            <li>Finally, if all goes well, the response from the token endpoint 
+              will contain a new Access token and a copy of the same refresh token
+              we sent. Use our setters to store the tokens.
+          </ul>
+            <a href="#why">Back to Top</a>
+          </div><!-- /.blog-post -->
+          <div class="blog-post">
+            <h2 id="api" class="blog-post-title">Calling the API</h2>
+            <p>We now have a library capable of logging in users, keeping them
+              logged in, and logging them out. Finally, we need to use our 
+              access token to actually <strong>call our secure api</strong>.
+            </p>
+            <p data-height="265" data-theme-id="0" data-slug-hash="zqgNMz" data-default-tab="js" data-user="
+              danielsbonnin" data-embed-version="2" class="codepen">See the Pen <a href="http://codepen.io/danielsbonnin/pen/zqgNMz/">zqgNMz</a> by Daniel S Bonnin (<a href="http://codepen.io/danielsbonnin">@danielsbonnin</a>) on <a href="http://codepen.io">CodePen</a>.
+            </p>
+            <script async src="//assets.codepen.io/assets/embed/ei.js"></script>
+            <h4>Notes:</h4>
+            <ul>
+              <li>The "Authorization" header field syntax is specified in 
+                <a href="https://tools.ietf.org/html/rfc6750#section-2.1">RFC 6750
+                  Section 2.1
+                </a>
+                <blockquote>
+                  When sending the access token in the "Authorization" request header
+                  field defined by HTTP/1.1 [RFC2617], the client uses the "Bearer"
+                  authentication scheme to transmit the access token.<br/><br/>
 
-          <nav>
-            <ul class="pager">
-              <li><a href="#">Previous</a></li>
-              <li><a href="#">Next</a></li>
-            </ul>
-          </nav>
-
+                  For example:<br/><br/>  GET /resource HTTP/1.1<br/>Host: server.example.com
+                  <br/>  Authorization: Bearer mF_9.B5f-4.1JqM
+                </blockquote> 
+              <li>If you are using Google Cloud Endpoints, a "GET" request to 
+                a secured resource might look something like in the example above.
+            </ul>    
+            <a href="#why">Back to Top</a>
+          </div><!-- /.blog-post -->
         </div><!-- /.blog-main -->
 
         <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
@@ -172,43 +392,20 @@
             <p>Author: Daniel Bonnin (bonnind)</p>
           </div>
           <div class="sidebar-module">
-<!--            <h4>Archives</h4>
-            <ol class="list-unstyled">
-              <li><a href="#">March 2014</a></li>
-              <li><a href="#">February 2014</a></li>
-              <li><a href="#">January 2014</a></li>
-              <li><a href="#">December 2013</a></li>
-              <li><a href="#">November 2013</a></li>
-              <li><a href="#">October 2013</a></li>
-              <li><a href="#">September 2013</a></li>
-              <li><a href="#">August 2013</a></li>
-              <li><a href="#">July 2013</a></li>
-              <li><a href="#">June 2013</a></li>
-              <li><a href="#">May 2013</a></li>
-              <li><a href="#">April 2013</a></li>
-            </ol>
-          </div>
-          <div class="sidebar-module">
-            <h4>Elsewhere</h4>
-            <ol class="list-unstyled">
-              <li><a href="#">GitHub</a></li>
-              <li><a href="#">Twitter</a></li>
-              <li><a href="#">Facebook</a></li>
-            </ol>
-          </div>
-    -->
             <h4>Jump to:</h4>
             <ol class="list-unstyled">
-              <li><a href="#">Sign-in Button</a></li>
-              <li><a href="#">On the API server</a></li>
-              <li><a href="#">Asynchronous Request</a></li>
-              <li><a href="#">Credential Locker</a></li>
-              <li><a href="#otherConsiderations">Other Considerations</a></li>
+              <li><a href="#why">Why would I do that?</a></li>
+              <li><a href="#oauth">OAuth 2.0</a></li>
+              <li><a href="#gaeSetup">App Engine Setup</a></li>
+              <li><a href="#winSetup">Windows App Setup</a></li>
+              <li><a href="#codeFlow">Authorization Code Flow</a></li>
+              <li><a href="#wab">WebAuthenticationBroker</a></li>
+              <li><a href="#swap">Swapping the code for the JWT</a></li>
+              <li><a href="#tokens">Store, retrieve, refresh, and revoke tokens</a></li>
+              <li><a href="#api">Calling the API</a></li>
             </ol>
         </div><!-- /.blog-sidebar -->
-
       </div><!-- /.row -->
-
     </div><!-- /.container -->
     <footer class="blog-footer">
       <p>Blog template built for <a href="http://getbootstrap.com">Bootstrap</a> by <a href="https://twitter.com/mdo">@mdo</a>.</p>
